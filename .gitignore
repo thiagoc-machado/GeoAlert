@@ -1,0 +1,77 @@
+# --------------------
+# Python / Django
+# --------------------
+*.py[cod]
+__pycache__/
+*.sqlite3
+*.log
+*.pot
+*.pyc
+venv/
+.env
+.env.*
+
+# Django Migrations
+*/migrations/*.py
+*/migrations/__pycache__/
+
+# --------------------
+# Node / Vue
+# --------------------
+node_modules/
+dist/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Vite cache
+.vite/
+
+# Local dev server
+.local/
+
+# --------------------
+# Docker / Containers
+# --------------------
+*.pid
+*.seed
+*.bak
+docker-compose.override.yml
+docker-compose.dev.yml
+
+# --------------------
+# PostgreSQL / Redis / MongoDB Volumes
+# --------------------
+pgdata/
+mongo-data/
+redis-data/
+
+# --------------------
+# VSCode / IDEs
+# --------------------
+.vscode/
+.idea/
+*.swp
+
+# --------------------
+# OS files
+# --------------------
+.DS_Store
+Thumbs.db
+
+# --------------------
+# Test / Coverage
+# --------------------
+htmlcov/
+.coverage
+coverage.xml
+.pytest_cache/
+
+# --------------------
+# Celery / Redis / Logs
+# --------------------
+celerybeat-schedule
+*.pid
+*.log
+logs/

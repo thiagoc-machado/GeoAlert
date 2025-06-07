@@ -1,0 +1,56 @@
+version: '3.8'
+
+services:
+  backend:
+    build: ./backend
+    container_name: geoalert-backend
+    command: gunicorn core.wsgi:application --bind 0.0.0.0:8000
+    volumes:
+      - ./backend:/app
+    ports:
+      - '8000:8000'
+    env_file:
+      - .env
+    depends_on:
+      - db
+      - redis
+      - mongo
+
+  frontend:
+    build: ./frontend
+    container_name: geoalert-frontend
+    ports:
+      - '80:80'
+    depends_on:
+      - backend
+
+  db:
+    image: postgis/postgis
+    container_name: geoalert-postgres
+    restart: always
+    environment:
+      POSTGRES_DB: geoalert
+      POSTGRES_USER: geoalert_user
+      POSTGRES_PASSWORD: secret
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - '5432:5432'
+
+  redis:
+    image: redis:alpine
+    container_name: geoalert-redis
+    ports:
+      - '6379:6379'
+
+  mongo:
+    image: mongo
+    container_name: geoalert-mongo
+    ports:
+      - '27017:27017'
+    volumes:
+      - mongo_data:/data/db
+
+volumes:
+  pgdata:
+  mongo_data:
