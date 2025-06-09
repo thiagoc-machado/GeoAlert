@@ -13,8 +13,10 @@ This is the backend for the **GeoAlert** project — a geographic alert system b
 - JWT Authentication (`djangorestframework-simplejwt`)
 - MongoDB (planned for logs)
 - Redis (for async tasks, planned)
+- Celery (planned for AI classification/summarization)
 - Docker + Docker Compose
 - Pytest + Coverage for testing
+- Swagger via `drf-spectacular`
 
 ---
 
@@ -24,7 +26,7 @@ This is the backend for the **GeoAlert** project — a geographic alert system b
 backend/
 ├── geoalert/          # Main Django project
 ├── alerts/            # Geo alerts app (GeoDjango)
-├── users/             # Custom user + JWT authentication
+├── users/             # Custom user + JWT + profile (auth/me)
 ├── tests/             # Centralized tests with fixtures
 ├── requirements.txt
 ├── Dockerfile
@@ -53,7 +55,7 @@ pip install -r requirements.txt
 
 ### 3. Configure environment variables
 
-Create a `.env` file or use `export` commands. Example:
+Create a `.env` file or export directly:
 
 ```env
 DEBUG=1
@@ -76,6 +78,49 @@ python manage.py createsuperuser
 
 ```bash
 python manage.py runserver
+```
+
+---
+
+## 🔐 Authentication (JWT)
+
+Implemented using `rest_framework_simplejwt`.
+
+### Endpoints:
+
+| Method | Endpoint                | Description              |
+|--------|-------------------------|--------------------------|
+| POST   | `/api/auth/register/`   | Register user            |
+| POST   | `/api/auth/login/`      | Get JWT access token     |
+| POST   | `/api/auth/refresh/`    | Refresh token            |
+| GET    | `/api/auth/me/`         | Get logged-in user data  |
+| PUT    | `/api/auth/me/`         | Update logged-in user    |
+
+---
+
+## 📍 Alerts API (GeoDjango)
+
+Authenticated users can create and retrieve geographic alerts.
+
+### Endpoints:
+
+| Method | Endpoint                | Description               |
+|--------|-------------------------|---------------------------|
+| GET    | `/api/alerts/`          | List alerts (GeoJSON)     |
+| POST   | `/api/alerts/`          | Create alert (GeoJSON)    |
+| GET    | `/api/alerts/<id>/`     | Retrieve single alert     |
+
+### Example alert payload (GeoJSON):
+
+```json
+{
+  "alert_type": "accident",
+  "description": "Road blocked due to crash",
+  "geometry": {
+    "type": "Point",
+    "coordinates": [-3.7038, 40.4168]
+  }
+}
 ```
 
 ---
@@ -103,46 +148,7 @@ make coverage-html
 xdg-open htmlcov/index.html
 ```
 
----
-
-## 🔐 Authentication (JWT)
-
-Implemented using `rest_framework_simplejwt`.
-
-### Endpoints:
-
-| Method | Endpoint              | Description           |
-|--------|-----------------------|-----------------------|
-| POST   | `/api/auth/register/` | Register user         |
-| POST   | `/api/auth/login/`    | Get JWT access token  |
-| POST   | `/api/auth/refresh/`  | Refresh token         |
-
----
-
-## 📍 Alerts API (GeoDjango)
-
-Authenticated users can create and retrieve geographic alerts.
-
-### Endpoints:
-
-| Method | Endpoint        | Description               |
-|--------|------------------|---------------------------|
-| GET    | `/api/alerts/`   | List alerts (GeoJSON)     |
-| POST   | `/api/alerts/`   | Create alert (GeoJSON)    |
-| GET    | `/api/alerts/<id>/` | Retrieve single alert |
-
-### Example alert payload (GeoJSON):
-
-```json
-{
-  "alert_type": "accident",
-  "description": "Road blocked due to crash",
-  "geometry": {
-    "type": "Point",
-    "coordinates": [-3.7038, 40.4168]
-  }
-}
-```
+✅ 100% test coverage with `coverage.xml`
 
 ---
 
@@ -168,20 +174,24 @@ make build
 
 ---
 
-## ✅ Test Coverage Summary
+## ✅ Features Completed (up to Day 4)
 
-- Auth (register, login, refresh, invalid login)
-- Alerts (create, list, retrieve, permissions)
-- Custom model string representations (`__str__`)
-- 100% coverage with `coverage.xml` report
+- JWT-based auth (register/login/refresh)
+- Profile management via `/auth/me/`
+- GeoAlert CRUD with GeoDjango and GeoJSON
+- Full unit test coverage (100%) with Pytest
+- Swagger auto-docs with drf-spectacular
+- Docker-ready environment
+- Clean code and SOLID principles applied
+- Frontend integrated with secure API
 
 ---
 
 ## 📌 Notes
 
-- PostGIS runs via Docker container
-- GDAL installed locally for development
-- Frontend is in `/frontend` (Vue 3 + Vite + Vuex)
+- PostGIS runs inside Docker container
+- GDAL installed locally for GeoDjango dev
+- Frontend lives in `/frontend` (Vue 3 + Vite + Vuex)
 - CORS enabled globally (`CORS_ALLOW_ALL_ORIGINS=True`)
 
 ---
