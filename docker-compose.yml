@@ -4,9 +4,10 @@ services:
   backend:
     build: ./backend
     container_name: geoalert-backend
-    command: gunicorn geoalert.wsgi:application --bind 0.0.0.0:8000
+    command: python manage.py runserver 0.0.0.0:8000
     volumes:
       - ./backend:/app
+      - ./backend/staticfiles:/app/staticfiles
     ports:
       - '8000:8000'
     env_file:
@@ -17,10 +18,17 @@ services:
       - mongo
 
   frontend:
-    build: ./frontend
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
     container_name: geoalert-frontend
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
     ports:
-      - '80:80'
+      - '5173:5173'
+    working_dir: /app
+    command: npm run dev -- --host
     depends_on:
       - backend
 
