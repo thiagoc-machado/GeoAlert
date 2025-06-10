@@ -1,3 +1,4 @@
+
 # 🛰️ GeoAlert Backend
 
 This is the backend for the **GeoAlert** project — a geographic alert system built with Django, Django REST Framework, and GeoDjango. It allows authenticated users to create, manage, and visualize georeferenced alerts (e.g., accidents, floods, construction).
@@ -12,8 +13,8 @@ This is the backend for the **GeoAlert** project — a geographic alert system b
 - GeoDjango + PostGIS
 - JWT Authentication (`djangorestframework-simplejwt`)
 - MongoDB (planned for logs)
-- Redis (for async tasks, planned)
-- Celery (planned for AI classification/summarization)
+- Redis (for async tasks)
+- Celery (for AI classification/summarization)
 - Docker + Docker Compose
 - Pytest + Coverage for testing
 - Swagger via `drf-spectacular`
@@ -25,13 +26,16 @@ This is the backend for the **GeoAlert** project — a geographic alert system b
 ```
 backend/
 ├── geoalert/          # Main Django project
+│   ├── __init__.py    # Celery auto-loads here
+│   └── celery.py      # Celery configuration
 ├── alerts/            # Geo alerts app (GeoDjango)
 ├── users/             # Custom user + JWT + profile (auth/me)
 ├── tests/             # Centralized tests with fixtures
 ├── requirements.txt
 ├── Dockerfile
 ├── Makefile
-└── pytest.ini
+├── pytest.ini
+└── .env
 ```
 
 ---
@@ -65,6 +69,9 @@ POSTGRES_USER=geoalert_user
 POSTGRES_PASSWORD=secret
 POSTGRES_HOST=localhost
 POSTGRES_PORT=5432
+CELERY_BROKER_URL=redis://localhost:6379/0
+CELERY_TASK_ALWAYS_EAGER=False
+CELERY_TASK_EAGER_PROPAGATES=False
 ```
 
 ### 4. Run migrations and create superuser
@@ -125,6 +132,24 @@ Authenticated users can create and retrieve geographic alerts.
 
 ---
 
+## ⚙️ Background Tasks with Celery
+
+GeoAlerts are automatically classified and summarized using an AI model (Groq API). This happens asynchronously via Celery + Redis.
+
+### Task file:
+
+```python
+from celery import shared_task
+
+@shared_task
+def classify_and_summarize_alert(alert_id, description):
+    ...
+```
+
+Tasks are mocked and tested with 100% coverage using Pytest.
+
+---
+
 ## 🧪 Testing and Coverage
 
 We use **pytest** and **pytest-django** with 100% test coverage.
@@ -174,7 +199,7 @@ make build
 
 ---
 
-## ✅ Features Completed (up to Day 4)
+## ✅ Features Completed
 
 - JWT-based auth (register/login/refresh)
 - Profile management via `/auth/me/`
@@ -182,6 +207,9 @@ make build
 - Full unit test coverage (100%) with Pytest
 - Swagger auto-docs with drf-spectacular
 - Docker-ready environment
+- Redis in isolated container
+- Celery integration with background task and eager execution for tests
+- AI-powered alert classification (mocked for now)
 - Clean code and SOLID principles applied
 - Frontend integrated with secure API
 

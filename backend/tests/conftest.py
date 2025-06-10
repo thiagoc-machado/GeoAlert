@@ -1,6 +1,10 @@
 import pytest
 from django.contrib.auth import get_user_model
 from rest_framework.test import APIClient
+import os
+
+os.environ['CELERY_TASK_ALWAYS_EAGER'] = 'True'
+os.environ['CELERY_TASK_EAGER_PROPAGATES'] = 'True'
 
 User = get_user_model()
 
