@@ -2,21 +2,26 @@
 from celery import shared_task
 import requests
 from django.conf import settings
+from core.mongo_logger import log_ia_action
+from alerts.models import Alert
 
 @shared_task
 def classify_and_summarize_alert(alert_id, description):
-    headers = {'Authorization': f'Bearer {settings.GROQ_API_KEY}'}
-    payload = {
-        'model': settings.GROQ_MODEL,
-        'messages': [
-            {'role': 'system', 'content': 'You are an assistant that classifies alerts and generates summaries.'},
-            {'role': 'user', 'content': description}
-        ]
-    }
-    try:
-        response = requests.post('https://api.groq.com/openai/v1/chat/completions', headers=headers, json=payload)
-        response.raise_for_status()
-        data = response.json()
-        return data
-    except Exception as e:
-        return {'error': str(e)}
+    from alerts.services import classify_text, summarize_text
+
+    alert = Alert.objects.get(id=alert_id)
+    classification = classify_text(description)
+    summary = summarize_text(description)
+
+    alert.alert_type = classification
+    alert.summary = summary
+    alert.save()
+
+    # Salvar log no MongoDB
+    log_ia_action(
+        user_id=alert.user.id,
+        action_type='classification_summary',
+        input_data={'description': description},
+        result_data={'classification': classification, 'summary': summary}
+    )
+

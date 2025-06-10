@@ -26,6 +26,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'django_extensions',
     'django_celery_beat',
+    'drf_spectacular',
 
     'core',
     'alerts',
@@ -72,7 +73,7 @@ DATABASES = {
         'NAME': config('POSTGRES_DB'),
         'USER': config('POSTGRES_USER'),
         'PASSWORD': config('POSTGRES_PASSWORD'),
-        'HOST': config('POSTGRES_HOST', default='localhost'),
+        'HOST': config('POSTGRES_HOST', default='db'),
         'PORT': config('POSTGRES_PORT', default='5432'),
     }
 }
@@ -106,6 +107,10 @@ USE_I18N = True
 USE_TZ = True
 
 STATIC_URL = 'static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'static'),
+]
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
@@ -117,6 +122,7 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',
     ),
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
 }
 
 CORS_ALLOW_ALL_ORIGINS = True
@@ -136,8 +142,8 @@ CELERY_TASK_ALWAYS_EAGER = config('CELERY_TASK_ALWAYS_EAGER', default=False, cas
 CELERY_TASK_EAGER_PROPAGATES = config('CELERY_TASK_EAGER_PROPAGATES', default=False, cast=bool)
 
 # MongoDB
-MONGO_URI = config('MONGO_URI')
-MONGO_DB = config('MONGO_DB')
+MONGO_URI = config('MONGO_URI', default='mongodb://localhost:27017')
+MONGO_DB_NAME = config('MONGO_DB_NAME', default='geoalert')
 
 # GROQ API
 GROQ_API_KEY = config('GROQ_API_KEY')

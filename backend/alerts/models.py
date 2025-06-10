@@ -11,6 +11,7 @@ class Alert(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     alert_type = models.CharField(max_length=50, choices=TYPE_CHOICES)
     description = models.TextField()
+    summary = models.TextField(blank=True, null=True)
     geometry = models.GeometryField()
     created_at = models.DateTimeField(auto_now_add=True)
 
