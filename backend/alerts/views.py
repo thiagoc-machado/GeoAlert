@@ -16,7 +16,7 @@ class AlertViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         alert = serializer.save(user=self.request.user)
-        classify_and_summarize_alert.delay(alert.id, alert.description)
+        classify_and_summarize_alert.delay(alert.id)
 
 class IAActionLogViewSet(viewsets.ViewSet):
     serializer_class = IAActionLogSerializer

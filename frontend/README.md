@@ -14,6 +14,8 @@ This is the frontend for the **GeoAlert** project — a geographic alert system 
 - Vite
 - Vitest (for testing)
 - CSS Modules + scoped styles
+- Docker + Docker Compose (for development)
+- Hot reload with Vite and Dockerfile.dev
 
 ---
 
@@ -30,7 +32,9 @@ frontend/
 │   ├── axios.js                 # Axios with JWT support
 │   └── main.js                  # App entry
 ├── tests/                       # Unit tests with Vitest
-└── vite.config.js
+├── vite.config.js
+├── Dockerfile                  # Production build (with Nginx)
+├── Dockerfile.dev              # Development with Vite hot reload
 ```
 
 ---
@@ -44,6 +48,12 @@ npm run dev
 ```
 
 Frontend available at: [http://localhost:5173](http://localhost:5173)
+
+Or using Docker Compose (dev):
+
+```bash
+docker-compose -f docker-compose.dev.yml up -d frontend
+```
 
 ---
 
@@ -69,6 +79,8 @@ Frontend available at: [http://localhost:5173](http://localhost:5173)
 - ✅ Favicon and HTML metadata updated
 - ✅ Responsive design with consistent UX
 - ✅ Tests with **Vitest** and 100% pass rate
+- ✅ `Dockerfile.dev` with Vite hot reload for development
+- ✅ `Dockerfile` for static production build with Nginx
 
 ---
 
@@ -89,19 +101,28 @@ Tests include:
 
 ---
 
+## 🐳 Docker Usage
+
+### Development (hot reload with Vite)
+
+```bash
+docker-compose -f docker-compose.dev.yml up -d frontend
+```
+
+### Production (static build with Nginx)
+
+```bash
+docker-compose up -d frontend
+```
+
+---
+
 ## 🖼️ UI Preview
 
 - Landing page with image + description
 - Leaflet map with alert markers
 - Responsive modals for profile
 - Modern buttons, colors, layout
-
----
-
-## 🧩 Next Steps (Day 5)
-
-- Integrate Celery with Redis
-- Add async AI tasks using Groq API
 
 ---
 

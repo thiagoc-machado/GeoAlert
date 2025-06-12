@@ -33,6 +33,7 @@ backend/
 ├── tests/             # Centralized tests with fixtures
 ├── requirements.txt
 ├── Dockerfile
+├── Dockerfile.dev     # Development Dockerfile with runserver
 ├── Makefile
 ├── pytest.ini
 └── .env
@@ -205,22 +206,28 @@ xdg-open htmlcov/index.html
 
 ## 🐳 Docker Usage (optional)
 
-### Build and run services
+### Build and run services (dev)
 
 ```bash
-make up
+docker-compose -f docker-compose.dev.yml up -d
 ```
 
 ### Stop containers
 
 ```bash
-make down
+docker-compose -f docker-compose.dev.yml down -v --remove-orphans
 ```
 
 ### Rebuild backend image
 
 ```bash
-make build
+docker-compose -f docker-compose.dev.yml build backend
+```
+
+### Production mode (default)
+
+```bash
+docker-compose up -d
 ```
 
 ---
@@ -240,6 +247,9 @@ make build
 - Access restriction tests (401 for unauthenticated users)
 - Clean code and SOLID principles applied
 - Frontend integrated with secure API
+- 🔁 Dockerfile.dev for backend with hot reload (`runserver`)
+- 📦 COMPOSE_BAKE support for optimized builds
+- ✳️ Separate docker-compose files for dev and prod
 
 ---
 

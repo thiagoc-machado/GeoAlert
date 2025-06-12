@@ -10,6 +10,7 @@ RUN apt-get update && \
     libpq-dev \
     gdal-bin \
     libgdal-dev \
+    libproj-dev \
     python3-dev \
     build-essential \
     binutils \

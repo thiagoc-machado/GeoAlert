@@ -3,6 +3,11 @@ from pathlib import Path
 from datetime import timedelta
 from decouple import config, Csv
 
+os.environ.setdefault(
+    'GDAL_LIBRARY_PATH',
+    '/usr/lib/x86_64-linux-gnu/libgdal.so.35'
+)
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -15,6 +20,7 @@ ALLOWED_HOSTS = config('DJANGO_ALLOWED_HOSTS', default='localhost,127.0.0.1').sp
 # Application definition
 
 INSTALLED_APPS = [
+    'django.contrib.gis',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -148,6 +154,7 @@ MONGO_DB_NAME = config('MONGO_DB_NAME', default='geoalert')
 # GROQ API
 GROQ_API_KEY = config('GROQ_API_KEY')
 GROQ_MODEL = config('GROQ_MODEL')
+GROQ_ENDPOINT = config('GROQ_ENDPOINT', default='https://api.groq.com/v1/')
 
 
 # GDAL

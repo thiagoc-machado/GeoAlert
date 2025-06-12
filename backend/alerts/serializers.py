@@ -2,13 +2,20 @@ from rest_framework_gis.serializers import GeoFeatureModelSerializer
 from .models import Alert
 from rest_framework import serializers
 from drf_spectacular.utils import extend_schema_field
+from django.contrib.gis.geos import GEOSGeometry
 
-@extend_schema_field(serializers.JSONField())
-class AlertSerializer(GeoFeatureModelSerializer):
+class AlertSerializer(serializers.ModelSerializer):
     class Meta:
         model = Alert
-        geo_field = 'geometry'
-        fields = ('id', 'alert_type', 'description', 'geometry', 'created_at')
+        fields = '__all__'
+        read_only_fields = ['user']
+
+    def to_internal_value(self, data):
+        data = data.copy()
+        geometry = data.get('geometry')
+        if geometry:
+            data['geometry'] = GEOSGeometry(str(geometry))
+        return super().to_internal_value(data)
 
 class IAActionLogSerializer(serializers.Serializer):
     type = serializers.CharField()
