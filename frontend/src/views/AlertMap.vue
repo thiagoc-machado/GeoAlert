@@ -17,6 +17,38 @@
         <div class="map-container">
             <h1>🗺️ Live Alert Map</h1>
             <p class="subtitle">View real-time geographic alerts on the map.</p>
+
+            <!-- Filtros -->
+            <div class="filters">
+                <input
+                    v-model="searchCity"
+                    placeholder="Search city..."
+                    class="form-input"
+                    @keyup.enter="searchByCity"
+                />
+                <select v-model="filterType" class="form-input">
+                    <option value="">All Types</option>
+                    <option value="flood">Flood</option>
+                    <option value="fire">Fire</option>
+                    <option value="construction">Construction</option>
+                </select>
+                <input
+                    type="date"
+                    v-model="filterStartDate"
+                    class="form-input"
+                />
+                <input type="date" v-model="filterEndDate" class="form-input" />
+                <input
+                    type="number"
+                    v-model.number="filterRadius"
+                    class="form-input"
+                    placeholder="Radius (km)"
+                />
+                <button class="btn primary" @click="loadAlerts">
+                    Apply Filters
+                </button>
+            </div>
+
             <div id="map" class="leaflet-map"></div>
         </div>
 
@@ -72,9 +104,6 @@
                 </template>
             </div>
         </div>
-
-        <!-- Mapa Leaflet -->
-        <div id="map" class="leaflet-map"></div>
     </div>
 </template>
 
@@ -82,11 +111,13 @@
     import L from "leaflet";
     import axios from "../axios";
     import { mapState, mapActions } from "vuex";
+    import wellknown from 'wellknown'
 
     export default {
         name: "AlertMap",
         data() {
             return {
+                alertLayer: null,
                 map: null,
                 showProfile: false,
                 editing: false,
@@ -96,15 +127,20 @@
                     first_name: "",
                     last_name: "",
                 },
+
+                searchCity: "",
+                filterType: "",
+                filterStartDate: "",
+                filterEndDate: "",
+                filterRadius: 10,
+                currentLat: null,
+                currentLon: null,
             };
         },
         computed: {
             ...mapState(["token"]),
             username() {
                 return this.profile.username || "User";
-            },
-            email() {
-                return this.profile.email || "";
             },
         },
         methods: {
@@ -129,6 +165,72 @@
                         alert("Error saving profile.");
                     });
             },
+            searchByCity() {
+                if (!this.searchCity) return;
+                const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
+                    this.searchCity
+                )}`;
+                fetch(url)
+                    .then((res) => res.json())
+                    .then((data) => {
+                        if (data.length > 0) {
+                            const { lat, lon } = data[0];
+                            this.map.setView(
+                                [parseFloat(lat), parseFloat(lon)],
+                                13
+                            );
+                        } else {
+                            alert("City not found.");
+                        }
+                    });
+            },
+            loadAlerts() {
+                const params = {};
+                if (this.filterType) params.alert_type = this.filterType;
+                if (this.filterStartDate)
+                    params.start_date = this.filterStartDate;
+                if (this.filterEndDate) params.end_date = this.filterEndDate;
+                if (this.currentLat && this.currentLon && this.filterRadius) {
+                    params.lat = this.currentLat;
+                    params.lon = this.currentLon;
+                    params.radius_km = this.filterRadius;
+                }
+
+                axios.get("/alerts/", { params }).then((res) => {
+                    const geojson = {
+                        type: "FeatureCollection",
+                        features: res.data.features.map((feature) => {
+                            // Verifica se o campo geometry é WKT
+                            if (typeof feature.geometry === "string") {
+                                const wkt = feature.geometry.replace(
+                                    /^SRID=\d+;/,
+                                    ""
+                                ); // remove o SRID
+                                feature.geometry = wellknown(wkt);
+                            }
+                            return feature;
+                        }),
+                    };
+
+                    // Remove camada anterior
+                    if (this.alertLayer) {
+                        this.map.removeLayer(this.alertLayer);
+                    }
+
+                    // Cria camada nova
+                    this.alertLayer = L.geoJSON(geojson, {
+                        onEachFeature: (feature, layer) => {
+                            const p = feature.properties;
+                            layer.bindPopup(`
+          <strong>Type:</strong> ${p.alert_type}<br>
+          <strong>Description:</strong> ${p.description}<br>
+          <strong>Summary:</strong> ${p.summary || "..."}<br>
+          <strong>Created:</strong> ${new Date(p.created_at).toLocaleString()}
+        `);
+                        },
+                    }).addTo(this.map);
+                });
+            },
         },
         mounted() {
             this.map = L.map("map").setView([40.4168, -3.7038], 6);
@@ -136,21 +238,18 @@
                 attribution: "&copy; OpenStreetMap contributors",
             }).addTo(this.map);
 
-            axios
-                .get("/alerts/")
-                .then((res) => {
-                    L.geoJSON(res.data, {
-                        onEachFeature: (feature, layer) => {
-                            const props = feature.properties;
-                            layer.bindPopup(
-                                `<strong>Type:</strong> ${props.alert_type}<br><strong>Description:</strong> ${props.description}`
-                            );
-                        },
-                    }).addTo(this.map);
-                })
-                .catch((err) => {
-                    console.error("Failed to load alerts:", err);
-                });
+            navigator.geolocation.getCurrentPosition(
+                (pos) => {
+                    this.currentLat = pos.coords.latitude;
+                    this.currentLon = pos.coords.longitude;
+                    this.map.setView([this.currentLat, this.currentLon], 12);
+                    this.loadAlerts();
+                },
+                () => {
+                    console.warn("User location not available");
+                    this.loadAlerts();
+                }
+            );
         },
     };
 </script>
@@ -159,8 +258,6 @@
     .alert-map-page {
         font-family: "Segoe UI", sans-serif;
     }
-
-    /* Barra superior */
     .top-bar {
         display: flex;
         justify-content: space-between;
@@ -170,51 +267,25 @@
         padding: 1rem 2rem;
         border-bottom: 3px solid #1abc9c;
     }
-
     .actions button {
         margin-left: 0.5rem;
     }
-
     .user-info {
         font-size: 1rem;
         font-weight: 500;
     }
-
-    /* Modal */
-    .modal {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: #00000088;
+    .filters {
         display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
         justify-content: center;
-        align-items: center;
-        z-index: 1000;
+        margin-bottom: 1rem;
     }
-
-    .modal-content {
-        background: white;
-        padding: 2rem;
-        border-radius: 12px;
-        max-width: 400px;
-        text-align: center;
+    .form-input {
+        padding: 0.5rem;
+        border: 1px solid #ccc;
+        border-radius: 8px;
     }
-
-    .modal-actions {
-        margin-top: 1rem;
-        display: flex;
-        justify-content: center;
-        gap: 1rem;
-    }
-
-    /* Mapa */
-    .map-container {
-        padding: 2rem;
-        text-align: center;
-    }
-
     .leaflet-map {
         height: 500px;
         width: 100%;
