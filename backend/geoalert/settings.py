@@ -33,6 +33,7 @@ INSTALLED_APPS = [
     'django_extensions',
     'django_celery_beat',
     'drf_spectacular',
+    'social_django',
 
     'core',
     'alerts',
@@ -165,3 +166,21 @@ GROQ_ENDPOINT = config('GROQ_ENDPOINT', default='https://api.groq.com/v1/')
 
 # GDAL
 GDAL_LIBRARY_PATH = config('GDAL_LIBRARY_PATH', default='/usr/lib/libgdal.so')
+
+AUTHENTICATION_BACKENDS = (
+    'social_core.backends.keycloak.KeycloakOAuth2',
+    'django.contrib.auth.backends.ModelBackend',
+)
+
+
+SOCIAL_AUTH_KEYCLOAK_KEY = '<client_id>'
+SOCIAL_AUTH_KEYCLOAK_SECRET = '<client_secret>'
+SOCIAL_AUTH_KEYCLOAK_REALM = '<realm_name>'
+SOCIAL_AUTH_KEYCLOAK_PUBLIC_KEY = '-----BEGIN PUBLIC KEY-----\nMIIB...'
+SOCIAL_AUTH_KEYCLOAK_AUTHORIZATION_URL = 'http://localhost:8080/realms/<realm_name>/protocol/openid-connect/auth'
+SOCIAL_AUTH_KEYCLOAK_ACCESS_TOKEN_URL = 'http://localhost:8080/realms/<realm_name>/protocol/openid-connect/token'
+SOCIAL_AUTH_KEYCLOAK_USERINFO_URL = 'http://localhost:8080/realms/<realm_name>/protocol/openid-connect/userinfo'
+
+LOGIN_URL = 'login'
+LOGOUT_URL = 'logout'
+LOGIN_REDIRECT_URL = '/'

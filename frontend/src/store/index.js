@@ -1,5 +1,6 @@
 import { createStore } from 'vuex'
 import axios from '../axios'
+import { keycloak } from '../keycloak'
 
 export default createStore({
   state: {
@@ -17,11 +18,12 @@ export default createStore({
   },
   actions: {
     async login({ commit }, credentials) {
-      const response = await axios.post('/auth/login/', credentials)
-      commit('setToken', response.data.access)
+      // login manual desativado, pois Keycloak faz o login automaticamente
+      console.warn('manual login is disabled, Keycloak handles authentication automatically')
     },
     logout({ commit }) {
       commit('clearToken')
+      keycloak.logout()  // logout via Keycloak
     }
   },
   getters: {
