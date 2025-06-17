@@ -52,7 +52,21 @@ class KeycloakAuthentication(BaseAuthentication):
             if not username or not email:
                 raise AuthenticationFailed('Token inválido.')
 
-            user, _ = User.objects.get_or_create(username=username, defaults={'email': email})
+            try:
+                user = User.objects.get(username=username)
+            except User.DoesNotExist:
+                first_name = decoded.get('given_name', '')
+                last_name = decoded.get('family_name', '')
+
+                user = User(
+                    username=username,
+                    email=email,
+                    first_name=first_name,
+                    last_name=last_name
+                )
+                user.set_unusable_password()
+                user.save()
+
             return (user, None)
 
         except jwt.ExpiredSignatureError:
