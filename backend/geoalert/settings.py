@@ -124,6 +124,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
+        'geoalert.authentication.KeycloakAuthentication',
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
     'DEFAULT_PERMISSION_CLASSES': (
@@ -133,9 +134,9 @@ REST_FRAMEWORK = {
         'DEFAULT_RENDERER_CLASSES': [
         'rest_framework.renderers.JSONRenderer',
     ],
-    'DEFAULT_RENDERER_CLASSES': [
-        'rest_framework.renderers.JSONRenderer',
-    ],
+    # 'DEFAULT_RENDERER_CLASSES': [
+    #     'rest_framework.renderers.JSONRenderer',
+    # ],
 }
 
 CORS_ALLOW_ALL_ORIGINS = True
@@ -173,13 +174,13 @@ AUTHENTICATION_BACKENDS = (
 )
 
 
-SOCIAL_AUTH_KEYCLOAK_KEY = '<client_id>'
+SOCIAL_AUTH_KEYCLOAK_KEY = 'frontend-client'
 SOCIAL_AUTH_KEYCLOAK_SECRET = '<client_secret>'
-SOCIAL_AUTH_KEYCLOAK_REALM = '<realm_name>'
-SOCIAL_AUTH_KEYCLOAK_PUBLIC_KEY = '-----BEGIN PUBLIC KEY-----\nMIIB...'
-SOCIAL_AUTH_KEYCLOAK_AUTHORIZATION_URL = 'http://localhost:8080/realms/<realm_name>/protocol/openid-connect/auth'
-SOCIAL_AUTH_KEYCLOAK_ACCESS_TOKEN_URL = 'http://localhost:8080/realms/<realm_name>/protocol/openid-connect/token'
-SOCIAL_AUTH_KEYCLOAK_USERINFO_URL = 'http://localhost:8080/realms/<realm_name>/protocol/openid-connect/userinfo'
+SOCIAL_AUTH_KEYCLOAK_REALM = 'geoalert'
+SOCIAL_AUTH_KEYCLOAK_PUBLIC_KEY = 'MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAtiOtEGdF5mBdpRVFv9zVkodIJs7Qch54unTmAPYcNJ34C1F+Mk9Wsk7spNY+LeSe0mjcz2HmeuEI393qwUB+FoJZUZ4XQnYQv0PEwj0vfLewnogv/WDXLAI7g5L5lgoTaJe2u/hl0qgfJpNEGJYbJh6lACz9TnB7wxta2Wmdmw3dojZvC7yv/XogxBqVXDoidzdQPqkVElqXNfnAA8Y913PQH5Vzow4eZ/avh79YQHtib4/A1NLQVDUclsJM9fiC/u85fiGhNbPiZOqjo+MRYpOBbWKj4G2X1oVtqq+zwaQ+hi8srAEpx5cJ73b90XszWLZVZGJan3Zq0tZtSIMbuQIDAQAB'
+SOCIAL_AUTH_KEYCLOAK_AUTHORIZATION_URL = 'http://localhost:8080/realms/geoalert/protocol/openid-connect/auth'
+SOCIAL_AUTH_KEYCLOAK_ACCESS_TOKEN_URL = 'http://localhost:8080/realms/geoalert/protocol/openid-connect/token'
+SOCIAL_AUTH_KEYCLOAK_USERINFO_URL = 'http://localhost:8080/realms/geoalert/protocol/openid-connect/userinfo'
 
 LOGIN_URL = 'login'
 LOGOUT_URL = 'logout'

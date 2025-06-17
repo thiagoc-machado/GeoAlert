@@ -3,6 +3,7 @@ import store from '../store'
 import Login from '../views/Login.vue'
 import AlertMap from '../views/AlertMap.vue'
 import Home from '../views/Home.vue'
+import { keycloak } from '../keycloak'
 
 const routes = [
   { path: '/', component: Home },
@@ -19,9 +20,9 @@ const router = createRouter({
   routes
 })
 
-router.beforeEach((to, _, next) => {
-  if (to.meta.requiresAuth && !store.getters.isAuthenticated) {
-    next('/login')
+router.beforeEach((to, from, next) => {
+  if (to.meta.requiresAuth && !keycloak.authenticated) {
+    keycloak.login({ redirectUri: window.location.origin + to.fullPath })
   } else {
     next()
   }
