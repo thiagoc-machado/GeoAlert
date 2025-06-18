@@ -42,7 +42,7 @@ class KeycloakAuthentication(BaseAuthentication):
                 token,
                 key=public_key,
                 algorithms=['RS256'],
-                audience='account',  # ou seu client_id, se configurado
+                audience='account',
                 options={'verify_exp': True}
             )
 
